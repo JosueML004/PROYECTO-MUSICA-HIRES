@@ -1,0 +1,98 @@
+Hifiplayer: Reproductor de Música de Alta Fidelidad
+1. Descripción General
+Hifiplayer es una aplicación de reproductor de música de alta fidelidad desarrollada en Go que se ejecuta en la consola. El sistema está diseñado para escanear directorios locales en busca de archivos de música (.mp3, .flac), extraer sus metadatos (artista, álbum, título), almacenarlos en una base de datos MySQL y permitir a los usuarios registrarse, iniciar sesión y reproducir su colección de música a través de una interfaz de menús interactiva.
+
+El proyecto demuestra una clara segmentación de responsabilidades, separando la lógica de la interfaz de usuario (main.go), el manejo de la base de datos (db.go) y el control de la reproducción de audio (music.go).
+
+2. Características Principales
+Gestión de Usuarios: Sistema completo de registro e inicio de sesión. Las contraseñas se almacenan de forma segura utilizando bcrypt.
+
+Escaneo de Biblioteca de Música: Escanea recursivamente un directorio especificado para encontrar archivos de música.
+
+Extracción de Metadatos: Utiliza la librería github.com/dhowden/tag para leer los metadatos de los archivos de audio.
+
+Persistencia de Datos: Toda la información de usuarios y metadatos de las canciones se guarda en una base de datos MySQL, lo que garantiza la persistencia entre sesiones.
+
+Navegación por Biblioteca: Permite a los usuarios explorar su música navegando por artistas y luego por álbumes.
+
+Reproducción de Audio: Utiliza la librería github.com/faiface/beep para la decodificación y reproducción de audio.
+
+Controles de Reproducción Completos:
+
+Play / Pausa
+
+Adelantar / Retroceder 10 segundos
+
+Siguiente / Anterior canción (dentro del mismo álbum)
+
+Ajuste de volumen
+
+Detener reproducción
+
+3. Instalación y Ejecución
+Para poder ejecutar la aplicación, sigue estos pasos cuidadosamente.
+
+Prerrequisitos
+Go: Debes tener instalado Go (versión 1.18 o superior). Puedes descargarlo desde go.dev.
+
+MySQL: Debes tener un servidor de base de datos MySQL en funcionamiento.
+
+Paso 1: Configurar la Base de Datos
+Ejecuta el script hify_player.sql incluido en el proyecto en tu cliente de MySQL. Esto creará la base de datos hify_player y las tablas usuarios y musicas necesarias para la aplicación.
+
+Paso 2: Descargar la Carpeta de Música
+Es indispensable descargar la carpeta de música de ejemplo desde el siguiente enlace. Esta carpeta ya contiene la estructura de Artista/Álbum que la aplicación espera.
+
+Enlace de Descarga: Carpeta de Música - Google Drive (https://drive.google.com/drive/folders/1ebEnc09VIJ8XpDz-J_u9tZhl3f1f5cJ6?usp=sharing)
+
+Descarga la carpeta completa llamada Musicas.
+
+Paso 3: Organizar la Estructura del Proyecto
+Crea una carpeta principal para tu proyecto (puedes llamarla hifiplayer-project). Dentro de esa carpeta, debes colocar los archivos de código fuente de Go y la carpeta Musicas que descargaste.
+
+La estructura final del árbol de directorios debe verse exactamente así:
+
+/hifiplayer-project/
+|
+|-- Musicas/  <-- La carpeta que descargaste de Google Drive va aquí
+|   |-- AC DC/
+|   |   |-- Back in Black/
+|   |   |   |-- 01 - Hells Bells.mp3
+|   |   |   |-- ... (otras canciones)
+|   |-- ... (otros artistas)
+|
+|-- main.go
+|-- db.go
+|-- music.go
+|-- hify_player.sql
+|-- go.mod      <-- (Este archivo se creará más adelante)
+`-- go.sum      <-- (Este archivo se creará más adelante)
+
+
+Paso 4: Modificar la Ruta en el Código
+Abre el archivo main.go con un editor de texto. Busca la siguiente línea (aproximadamente la línea 27):
+
+musicas, err := ScanMusicDirectory("C:\\Users\\Usuario\\Documents\\GitHub\\PROYECTO-MUSICA-HIRES\\PROYECTO-MUSICA-HIRES\\Musicas")
+
+Debes reemplazar esa ruta por la ruta absoluta a la carpeta Musicas en tu propia computadora.
+
+Ejemplo en Windows: C:\\Users\\TuNombre\\Desktop\\hifiplayer-project\\Musicas
+
+Ejemplo en macOS/Linux: /home/tu_usuario/proyectos/hifiplayer-project/Musicas
+
+Paso 5: Instalar Dependencias y Ejecutar
+Abre una terminal o línea de comandos.
+
+Navega hasta el directorio de tu proyecto (hifiplayer-project).
+
+cd ruta/a/hifiplayer-project
+
+Ejecuta el siguiente comando para inicializar el módulo de Go y descargar las dependencias necesarias:
+
+go mod tidy
+
+Finalmente, ejecuta la aplicación:
+
+go run .
+
+¡Listo! La aplicación se instalo 
