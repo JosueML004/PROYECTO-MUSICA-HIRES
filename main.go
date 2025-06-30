@@ -130,14 +130,9 @@ func mostrarUsuarios(db *DB) {
 	if err != nil {
 		fmt.Println("Error obteniendo usuarios:", err)
 		return
-	}
-	fmt.Println("\n--- Usuarios Registrados ---")
-	for _, usuario := range usuarios {
-		activo := "Inactivo"
-		if usuario.Activo {
-			activo = "Activo"
-		}
-		fmt.Printf("Nombre: %s, Email: %s, Estado: %s\n", usuario.Nombre, usuario.Email, activo)
+	
+
+		
 	}
 	fmt.Println("--------------------------\n")
 }
