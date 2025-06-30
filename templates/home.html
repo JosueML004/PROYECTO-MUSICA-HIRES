@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hifiplayer - Biblioteca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #e5e5e5; }
+        .content-grid { grid-template-columns: 320px 1fr; }
+        .library-panel { background-color: #121212; border-right: 1px solid #262626; }
+        .artist-header, .album-summary, .song-item-row { transition: background-color 0.2s; }
+        .artist-header:hover, .album-summary:hover { background-color: #282828; }
+        .album-summary.active { background-color: #303030; }
+        .song-item-row { cursor: pointer; }
+        .song-item-row:hover { background-color: #2a2a2a; }
+        .song-item-row.playing { color: #22c55e; }
+        .player-bar { background-color: #181818; border-top: 1px solid #262626; }
+        .control-btn { color: #a3a3a3; transition: color 0.2s; }
+        .control-btn:hover { color: #ffffff; }
+        .control-btn.active { color: #22c55e; }
+        #audio-player { display: none; }
+        /* Estilos para la barra de progreso y volumen */
+        #progress-container:hover #progress-bar { background-color: #1db954; }
+        input[type=range] { -webkit-appearance: none; background: transparent; cursor: pointer; }
+        input[type=range]::-webkit-slider-runnable-track { height: 4px; background: #535353; border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -4px; background-color: #fff; height: 12px; width: 12px; border-radius: 50%; opacity: 0; transition: opacity 0.2s; }
+        input[type=range]:hover::-webkit-slider-thumb { opacity: 1; }
+        input[type=range]:hover::-webkit-slider-runnable-track { background: #1db954; }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="h-screen w-full flex flex-col">
+
+    <div class="content-grid flex-grow overflow-hidden">
+        <!-- Panel Izquierdo: Biblioteca con canciones desplegables -->
+        <aside class="library-panel flex flex-col h-full">
+            <header class="p-4 border-b border-[#262626] flex justify-between items-center shrink-0">
+                <h1 class="text-xl font-bold"><span class="text-green-500">Hifi</span>player</h1>
+                <a href="/logout" class="text-sm text-gray-400 hover:text-white transition-colors">Cerrar Sesión</a>
+            </header>
+            <div id="library-nav" class="overflow-y-auto flex-grow">
+                <nav class="py-2">
+                    {{range .Library}}
+                    <div class="artist-item">
+                        <!-- Cabecera del Artista -->
+                        <div class="artist-header font-semibold flex items-center p-4 cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill mr-3 shrink-0" viewBox="0 0 16 16"><path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/></svg>
+                            <span>{{.Name}}</span>
+                        </div>
+                        <!-- Contenedor de Álbumes (inicialmente oculto) -->
+                        <div class="albums-container pl-6 space-y-1 hidden">
+                            {{$artist := .}}
+                            {{range .Albums}}
+                            <div class="album-group">
+                                <!-- Resumen del Álbum -->
+                                <div class="album-summary p-2 rounded-md cursor-pointer flex items-center" data-artist="{{$artist.Name}}" data-album="{{.Name}}">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-disc-fill inline-block mr-2 shrink-0" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4 8a4 4 0 1 0 8 0 4 4 0 0 0-8 0m4-2a2 2 0 1 1 0 4 2 2 0 0 1 0-4"/></svg>
+                                    <span class="text-sm text-gray-300">{{.Name}}</span>
+                                </div>
+                                <!-- Lista de Canciones del Álbum (inicialmente oculta) -->
+                                <div class="song-list-container pl-6 hidden">
+                                    {{range .Songs}}
+                                    <!-- CORRECCIÓN: Se usan los campos .Artist y .Album de la estructura Song -->
+                                    <div class="song-item-row text-sm text-gray-400 p-2 rounded-md" data-song-id="{{.ID}}" data-title="{{.Title}}" data-artist="{{.Artist}}" data-album="{{.Album}}">
+                                        {{.Title}}
+                                    </div>
+                                    {{end}}
+                                </div>
+                            </div>
+                            {{end}}
+                        </div>
+                    </div>
+                    {{else}}
+                    <p class="text-center text-gray-500 mt-10">No se encontraron artistas.</p>
+                    {{end}}
+                </nav>
+            </div>
+            <footer class="p-4 border-t border-[#262626] text-xs text-gray-500 shrink-0">
+                <p>Bienvenido, {{.User.Nombre}}</p>
+                <p>{{.User.Email}}</p>
+            </footer>
+        </aside>
+
+        <!-- Panel Derecho: Ahora es estático o para futura info/visualización -->
+        <main id="main-content" class="flex flex-col h-full bg-[#0a0a0a] p-8 overflow-y-auto">
+            <div id="welcome-message" class="text-center mt-20">
+                <h2 class="text-5xl font-bold text-white mb-4"><span class="text-green-500">Hifi</span>player</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Explora tu biblioteca a la izquierda, despliega los artistas y álbumes para reproducir tu música.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Barra de Reproducción Avanzada con Iconos Mejorados -->
+    <div class="player-bar grid grid-cols-3 items-center px-4 h-24">
+        <div class="flex items-center min-w-0">
+            <div class="ml-3 truncate">
+                <p id="now-playing-title" class="font-semibold text-white truncate text-sm">Selecciona una canción</p>
+                <p id="now-playing-artist-album" class="text-xs text-gray-400 truncate">&nbsp;</p>
+            </div>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="flex items-center space-x-4">
+                <button id="prev-btn" class="control-btn" title="Anterior"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 19V5L8 12L20 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                <audio id="audio-player"></audio>
+                <button id="play-pause-btn" class="control-btn bg-white text-black rounded-full h-10 w-10 flex items-center justify-center" title="Reproducir/Pausar">
+                    <svg id="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 5.27436V18.7256C5 19.7621 5.93883 20.4437 6.89832 19.922L18.611 13.2036C19.5651 12.6849 19.5651 11.3151 18.611 10.7964L6.89832 4.07799C5.93883 3.55629 5 4.23788 5 5.27436Z" fill="currentColor"/></svg>
+                    <svg id="pause-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="hidden"><path d="M8 5H6V19H8V5Z" fill="currentColor"/><path d="M18 5H16V19H18V5Z" fill="currentColor"/></svg>
+                </button>
+                <button id="next-btn" class="control-btn" title="Siguiente"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5V19L16 12L4 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="w-full flex items-center space-x-2 mt-2">
+                <span id="current-time" class="text-xs text-gray-400 w-10 text-right">0:00</span>
+                <div id="progress-container" class="bg-gray-700 rounded-full h-1 w-full cursor-pointer group">
+                    <div id="progress-bar" class="bg-white h-1 rounded-full"></div>
+                </div>
+                <span id="total-duration" class="text-xs text-gray-400 w-10 text-left">0:00</span>
+            </div>
+        </div>
+        <div class="flex items-center justify-end">
+            <svg id="volume-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L8 8H4V16H8L12 20V4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 8C17.1046 9.10457 17.1046 10.8954 16 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="1" class="w-24 ml-2">
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // ESTADO DEL REPRODUCTOR
+    let currentPlaylist = [];
+    let currentTrackIndex = -1;
+
+    // ELEMENTOS DEL DOM
+    const audioPlayer = document.getElementById('audio-player');
+    const libraryNav = document.getElementById('library-nav');
+    const nowPlayingTitle = document.getElementById('now-playing-title');
+    const nowPlayingArtistAlbum = document.getElementById('now-playing-artist-album');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const currentTimeEl = document.getElementById('current-time');
+    const totalDurationEl = document.getElementById('total-duration');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const volumeSlider = document.getElementById('volume-slider');
+
+    // LÓGICA DE LA INTERFAZ DE LA BIBLIOTECA
+    libraryNav.addEventListener('click', (e) => {
+        const artistHeader = e.target.closest('.artist-header');
+        const albumSummary = e.target.closest('.album-summary');
+        
+        // Desplegar álbumes de un artista
+        if (artistHeader) {
+            artistHeader.nextElementSibling.classList.toggle('hidden');
+        }
+        
+        // Desplegar canciones de un álbum
+        if (albumSummary) {
+            albumSummary.nextElementSibling.classList.toggle('hidden');
+            albumSummary.classList.toggle('active');
+        }
+
+        // Reproducir una canción
+        const songRow = e.target.closest('.song-item-row');
+        if (songRow) {
+            const albumContainer = songRow.closest('.song-list-container').parentElement;
+            currentPlaylist = Array.from(albumContainer.querySelectorAll('.song-item-row')).map(row => ({
+                id: row.dataset.songId, title: row.dataset.title, artist: row.dataset.artist, album: row.dataset.album,
+            }));
+            const songId = songRow.dataset.songId;
+            const index = currentPlaylist.findIndex(song => song.id === songId);
+            playSong(index);
+        }
+    });
+
+    // LÓGICA DEL REPRODUCTOR
+    const playSong = (index) => {
+        if (index < 0 || index >= currentPlaylist.length) return;
+        currentTrackIndex = index;
+        const song = currentPlaylist[currentTrackIndex];
+        
+        audioPlayer.src = `/api/song/${song.id}`;
+        audioPlayer.play();
+        
+        nowPlayingTitle.textContent = song.title;
+        nowPlayingArtistAlbum.textContent = `${song.artist} — ${song.album}`;
+        updatePlayingHighlight();
+    };
+
+    const playNext = () => {
+        if (currentPlaylist.length === 0) return;
+        playSong((currentTrackIndex + 1) % currentPlaylist.length);
+    };
+
+    const playPrev = () => {
+        if (currentPlaylist.length === 0) return;
+        if (audioPlayer.currentTime > 3) {
+            playSong(currentTrackIndex);
+        } else {
+            playSong((currentTrackIndex - 1 + currentPlaylist.length) % currentPlaylist.length);
+        }
+    };
+    
+    // EVENTOS Y FUNCIONES DE AYUDA
+    playPauseBtn.addEventListener('click', () => audioPlayer.paused ? audioPlayer.play() : audioPlayer.pause());
+    nextBtn.addEventListener('click', playNext);
+    prevBtn.addEventListener('click', playPrev);
+    audioPlayer.addEventListener('ended', playNext);
+
+    audioPlayer.addEventListener('play', () => { playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden'); });
+    audioPlayer.addEventListener('pause', () => { playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); });
+    
+    audioPlayer.addEventListener('timeupdate', () => {
+        if (isNaN(audioPlayer.duration)) return;
+        progressBar.style.width = `${(audioPlayer.currentTime / audioPlayer.duration) * 100}%`;
+        currentTimeEl.textContent = formatTime(audioPlayer.currentTime);
+    });
+
+    audioPlayer.addEventListener('loadedmetadata', () => {
+        totalDurationEl.textContent = formatTime(audioPlayer.duration);
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+        if (isNaN(audioPlayer.duration)) return;
+        audioPlayer.currentTime = (e.offsetX / progressContainer.clientWidth) * audioPlayer.duration;
+    });
+
+    volumeSlider.addEventListener('input', (e) => { audioPlayer.volume = e.target.value; });
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
+    const updatePlayingHighlight = () => {
+        document.querySelectorAll('.song-item-row').forEach(row => row.classList.remove('playing'));
+        if (currentTrackIndex === -1) return;
+        const songId = currentPlaylist[currentTrackIndex].id;
+        const activeRow = document.querySelector(`.song-item-row[data-song-id="${songId}"]`);
+        if (activeRow) activeRow.classList.add('playing');
+    };
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hifiplayer - Iniciar Sesión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-input {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            color: #e0e0e0;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #22c55e; /* green-500 */
+            box-shadow: 0 0 0 2px #101010, 0 0 0 4px #22c55e;
+        }
+        .submit-btn {
+            background-color: #16a34a; /* green-600 */
+        }
+        .submit-btn:hover {
+            background-color: #15803d; /* green-700 */
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-[#0a0a0a] text-gray-200 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md p-8 space-y-8 bg-[#141414] rounded-2xl shadow-lg border border-[#262626]">
+        <div>
+            <h1 class="text-3xl font-bold text-center text-white">
+                <span class="text-green-500">Hifi</span>player
+            </h1>
+            <p class="mt-2 text-center text-sm text-gray-400">
+                Bienvenido de nuevo
+            </p>
+        </div>
+        <form class="mt-8 space-y-6" action="/login" method="POST">
+            <!-- Mensaje de éxito/error -->
+            {{if .}}
+                <p class="text-center text-sm {{if .Success}}text-green-500{{else}}text-red-500{{end}}">{{.Message}}</p>
+            {{end}}
+
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="email" class="sr-only">Correo Electrónico</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required
+                        class="form-input appearance-none rounded-none relative block w-full px-3 py-3 border placeholder-gray-500 text-white rounded-t-md focus:z-10 sm:text-sm"
+                        placeholder="Correo Electrónico">
+                </div>
+                <div>
+                    <label for="password" class="sr-only">Contraseña</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required
+                        class="form-input appearance-none rounded-none relative block w-full px-3 py-3 border placeholder-gray-500 text-white rounded-b-md focus:z-10 sm:text-sm"
+                        placeholder="Contraseña">
+                </div>
+            </div>
+
+            <div>
+                <button type="submit"
+                    class="submit-btn group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-900 transition-colors">
+                    Iniciar Sesión
+                </button>
+            </div>
+        </form>
+        <p class="mt-4 text-center text-sm">
+            ¿No tienes una cuenta?
+            <a href="/register" class="font-medium text-green-500 hover:text-green-400">
+                Regístrate
+            </a>
+        </p>
+    </div>
+</body>
+</html>
