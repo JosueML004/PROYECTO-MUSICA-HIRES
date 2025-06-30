@@ -1,3 +1,4 @@
+// Original content of users_passwords.go
 package main
 
 import (
@@ -29,10 +30,10 @@ func (up *UsersPasswords) AddUser(email, nombre, clave string) error {
 		return errors.New("el usuario ya existe")
 	}
 	up.usuarios[emailLower] = &Usuario{
-		nombre: nombre,
-		email:  emailLower,
-		clave:  clave,
-		activo: false,
+		Nombre: nombre,
+		Email:  emailLower,
+		Clave:  clave,
+		Activo: false,
 	}
 	return nil
 }
@@ -55,22 +56,25 @@ func (up *UsersPasswords) VerifyUser(email, clave string) bool {
 	if !existe {
 		return false
 	}
-	if usuario.clave != clave {
+	if usuario.Clave != clave {
 		return false
 	}
 	return true
 }
 
 // Método para activar un usuario
-func (up *UsersPasswords) ActivateUser(email string) error {
+func (up *UsersPasswords) ActivateUser(email string, db *DB) error {
 	up.mu.Lock()
 	defer up.mu.Unlock()
 
-	usuario, existe := up.usuarios[strings.ToLower(email)]
+	_, existe := up.usuarios[strings.ToLower(email)]
 	if !existe {
 		return errors.New("usuario no encontrado")
 	}
-	usuario.Activar()
+	err := db.ActivateUser(email)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
