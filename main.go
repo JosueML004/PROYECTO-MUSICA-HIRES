@@ -61,7 +61,7 @@ func main() {
 		case "1":
 			if ingresar(db, reader) {
 				fmt.Println("Acceso concedido")
-				mostrarUsuarios(db)
+				// mostrarUsuarios(db) // Se comenta para no mostrar la lista de usuarios
 				menuUsuario(db, reader)
 			} else {
 				fmt.Println("Usuario o clave incorrectos")
@@ -130,9 +130,14 @@ func mostrarUsuarios(db *DB) {
 	if err != nil {
 		fmt.Println("Error obteniendo usuarios:", err)
 		return
-	
-
-		
+	}
+	fmt.Println("\n--- Usuarios Registrados ---")
+	for _, usuario := range usuarios {
+		activo := "Inactivo"
+		if usuario.Activo {
+			activo = "Activo"
+		}
+		fmt.Printf("Nombre: %s, Email: %s, Estado: %s\n", usuario.Nombre, usuario.Email, activo)
 	}
 	fmt.Println("--------------------------\n")
 }
@@ -310,7 +315,7 @@ func playerMenu(reader *bufio.Reader) {
 		case "7":
 			StopMusic()
 			currentSongIndex = -1 // Reiniciar índice para indicar que no hay canción en reproducción
-			return                // Salir del menú de reproducción
+			return               // Salir del menú de reproducción
 		default:
 			fmt.Println("Opción inválida. Intente de nuevo.")
 		}
