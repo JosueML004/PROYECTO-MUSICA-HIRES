@@ -43,16 +43,16 @@ Ejecuta el script hify_player.sql incluido en el proyecto en tu cliente de MySQL
 Paso 2: Descargar la Carpeta de Música
 Es indispensable descargar la carpeta de música de ejemplo desde el siguiente enlace. Esta carpeta ya contiene la estructura de Artista/Álbum que la aplicación espera.
 
-Enlace de Descarga: Carpeta de Música - Google Drive (https://drive.google.com/drive/folders/1ebEnc09VIJ8XpDz-J_u9tZhl3f1f5cJ6?usp=sharing)
+Enlace de Descarga: Carpeta de Música - Google Drive
 
 Descarga la carpeta completa llamada Musicas.
 
 Paso 3: Organizar la Estructura del Proyecto
-Crea una carpeta principal para tu proyecto (puedes llamarla hifiplayer-project). Dentro de esa carpeta, debes colocar los archivos de código fuente de Go y la carpeta Musicas que descargaste.
+Para simplificar la configuración, se recomienda que todo el proyecto resida dentro de una carpeta principal llamada PROYECTO-MUSICA-HIRES. Dentro de esta, coloca los archivos de código y la carpeta Musicas que descargaste.
 
 La estructura final del árbol de directorios debe verse exactamente así:
 
-/hifiplayer-project/
+/PROYECTO-MUSICA-HIRES/
 |
 |-- Musicas/  <-- La carpeta que descargaste de Google Drive va aquí
 |   |-- AC DC/
@@ -68,24 +68,27 @@ La estructura final del árbol de directorios debe verse exactamente así:
 |-- go.mod      <-- (Este archivo se creará más adelante)
 `-- go.sum      <-- (Este archivo se creará más adelante)
 
-
-Paso 4: Modificar la Ruta en el Código
+Paso 4: Ajustar la Ruta de la Música en el Código
 Abre el archivo main.go con un editor de texto. Busca la siguiente línea (aproximadamente la línea 27):
 
 musicas, err := ScanMusicDirectory("C:\\Users\\Usuario\\Documents\\GitHub\\PROYECTO-MUSICA-HIRES\\PROYECTO-MUSICA-HIRES\\Musicas")
 
-Debes reemplazar esa ruta por la ruta absoluta a la carpeta Musicas en tu propia computadora.
+El código necesita la ruta absoluta a tu carpeta Musicas. Reemplaza la ruta del ejemplo por la ruta correcta en tu sistema.
 
-Ejemplo en Windows: C:\\Users\\TuNombre\\Desktop\\hifiplayer-project\\Musicas
+Consejo para simplificar: Si has seguido la estructura de carpetas recomendada, tu ruta será algo así:
 
-Ejemplo en macOS/Linux: /home/tu_usuario/proyectos/hifiplayer-project/Musicas
+En Windows: C:\\Ruta\\Donde\\Guardaste\\PROYECTO-MUSICA-HIRES\\Musicas
+
+En macOS/Linux: /home/usuario/ruta/PROYECTO-MUSICA-HIRES/Musicas
+
+Asegúrate de usar dobles barras invertidas (\\) en Windows o barras normales (/) en macOS/Linux.
 
 Paso 5: Instalar Dependencias y Ejecutar
 Abre una terminal o línea de comandos.
 
-Navega hasta el directorio de tu proyecto (hifiplayer-project).
+Navega hasta el directorio de tu proyecto (PROYECTO-MUSICA-HIRES).
 
-cd ruta/a/hifiplayer-project
+cd ruta/a/PROYECTO-MUSICA-HIRES
 
 Ejecuta el siguiente comando para inicializar el módulo de Go y descargar las dependencias necesarias:
 
