@@ -1,1 +1,106 @@
-Notas del proyecto.
+Hifiplayer: Reproductor de Música Web
+1. Descripción General
+Hifiplayer ha evolucionado de una aplicación de consola a una aplicación web completa, moderna y funcional, desarrollada en Go. El sistema funciona como un servicio de streaming de música personal, similar a Plex o Spotify, permitiendo a los usuarios registrarse, iniciar sesión y explorar una biblioteca musical servida desde un backend robusto.
+
+La aplicación ahora presenta una interfaz de usuario web interactiva construida con HTML, CSS y JavaScript, y es servida por un backend de Go que gestiona la autenticación, el acceso a la base de datos y el streaming de audio en tiempo real.
+
+2. Pila Tecnológica (Tech Stack)
+Backend: Go (Golang)
+
+Servidor Web: Paquete net/http estándar de Go.
+
+Encriptación: golang.org/x/crypto/bcrypt para el hashing seguro de contraseñas.
+
+Frontend:
+
+HTML5 semántico.
+
+Tailwind CSS para un diseño de interfaz de usuario moderno y responsivo.
+
+JavaScript (Vanilla) para la interactividad del cliente (DOM, eventos, reproductor de audio).
+
+Base de Datos: MySQL
+
+Driver: github.com/go-sql-driver/mysql.
+
+3. Características Principales
+Interfaz Web Completa: Se reemplazó la consola por una interfaz gráfica de usuario accesible desde cualquier navegador web.
+
+Sistema de Autenticación Web:
+
+Página de Registro de Usuario (/register) para crear nuevas cuentas.
+
+Página de Inicio de Sesión (/login) con gestión de sesiones mediante cookies.
+
+Biblioteca Musical Interactiva:
+
+La biblioteca de artistas y álbumes se muestra en un panel lateral.
+
+Los artistas y álbumes son desplegables, permitiendo al usuario explorar la colección de forma intuitiva sin cambiar de página.
+
+Reproductor de Audio Avanzado:
+
+Streaming de audio (.mp3, .flac) directamente al navegador sin necesidad de descargas.
+
+Controles funcionales de Play/Pausa, Siguiente y Anterior.
+
+Barra de Progreso visual que muestra el tiempo transcurrido y la duración total.
+
+Control de Volumen mediante un slider.
+
+Backend Concurrente: Aprovecha el modelo de concurrencia nativo de Go para manejar múltiples solicitudes de usuarios de forma simultánea y eficiente.
+
+4. Estructura del Proyecto
+La arquitectura ha sido adaptada para un modelo cliente-servidor web:
+
+main.go.go: Punto de entrada y núcleo del servidor web. Responsable de:
+
+Inicializar la conexión a la base de datos.
+
+Registrar las rutas HTTP (endpoints) y asociarlas a sus manejadores (http.HandleFunc).
+
+Parsear y renderizar las plantillas HTML (html/template).
+
+db.go: Capa de acceso a datos. Encapsula toda la lógica de la base de datos (conexión, CRUD de usuarios y música) para mantener el código limpio y modular.
+
+templates/: Directorio que contiene todas las plantillas HTML del frontend.
+
+login.html: Formulario de inicio de sesión.
+
+register.html: Formulario de registro de nuevos usuarios.
+
+home.html: La vista principal de la aplicación, que incluye la biblioteca musical y el reproductor.
+
+hify_player.sql: Script SQL para la configuración inicial de la base de datos y sus tablas.
+
+Archivos Heredados: music.go y users_passwords.go formaron parte de la versión de consola original. Su lógica ha sido integrada y adaptada dentro de main.go.go y db.go para el entorno web.
+
+5. Lógica Clave y Endpoints de la API
+El servidor utiliza una arquitectura de API RESTful simple para manejar las solicitudes:
+
+POST /register: Recibe los datos del formulario de registro, hashea la contraseña y crea un nuevo usuario en la base de datos.
+
+POST /login: Verifica las credenciales del usuario. Si son correctas, crea una cookie de sesión y redirige al home.
+
+GET /home: Protegido por la cookie de sesión. Obtiene los datos del usuario y toda la biblioteca musical, y los renderiza en la plantilla home.html.
+
+GET /logout: Invalida la cookie de sesión y redirige al usuario a la página de login.
+
+GET /api/song/:id: Endpoint de streaming. Cuando el reproductor de audio del frontend solicita esta URL, el servidor utiliza http.ServeFile para transmitir el archivo de audio correspondiente al navegador de forma eficiente.
+
+6. Cómo Compilar y Ejecutar.
+Configurar la Base de Datos: Ejecute el script hify_player.sql en su servidor MySQL para crear la base de datos hify_player y sus tablas.
+
+Instalar Go: Asegúrese de tener Go (versión 1.18 o superior) instalado.
+
+Poblar la Base de Datos: Asegúrese de tener datos en su tabla musicas con las rutas correctas a sus archivos de audio locales.
+
+Instalar Dependencias: Navegue al directorio del proyecto en su terminal y ejecute go mod tidy. Esto descargará las librerías necesarias.
+
+Ejecutar el Servidor: Corra el programa desde la terminal con el comando:
+
+go run ./*.go
+
+(Se usa *.go para asegurar que todos los archivos del paquete main sean incluidos en la compilación).
+
+Acceder a la Aplicación: Abra su navegador web y visite http://localhost:8080. Será redirigido a la página de inicio de sesión
